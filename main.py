@@ -57,15 +57,15 @@ class Enemy (pygame.sprite.Sprite):
     def __init__(self, type):
         super().__init__()
         y_pos = 0
-        if type == 'fly':
-            fly_1 = pygame.image.load('graphics/Fly/Fly1.png').convert_alpha()
-            fly_2 = pygame.image.load('graphics/Fly/Fly2.png').convert_alpha()
+        if type == 'parrot':
+            fly_1 = pygame.image.load('graphics/Fly/parrot_1.png').convert_alpha()
+            fly_2 = pygame.image.load('graphics/Fly/parrot_2.png').convert_alpha()
             self.frames = [fly_1,fly_2]
             y_pos = 200
         else:
-            snail_1 = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
-            snail_2 = pygame.image.load('graphics/snail/snail2.png').convert_alpha()
-            self.frames = [snail_1, snail_2]
+            spider_1 = pygame.image.load('graphics/snail/spider1.png').convert_alpha()
+            spider_2 = pygame.image.load('graphics/snail/spider2.png').convert_alpha()
+            self.frames = [spider_1, spider_2]
             y_pos = 300
 
         self.animation_index = 0
@@ -75,7 +75,7 @@ class Enemy (pygame.sprite.Sprite):
 
     def animation(self):
         if type == 'fly':
-            self.animation_index += .45
+            self.animation_index += .1
         else:
             self.animation_index += .3
 
@@ -107,7 +107,7 @@ class Fruit (pygame.sprite.Sprite):
 
     def update(self):
         self.animation()
-        self.rect.x -= 5
+        self.rect.x -= 3
 
     def delete(self):
         if self.rect.x <= -50:
@@ -162,6 +162,9 @@ ground_surf = pygame.image.load('graphics/Ground.png').convert()
 score_surf = test_font.render('Score', False, 'Black')
 score_rect = score_surf.get_rect(midright = (600,30))
 
+best_surf = test_font.render('Best', False, 'Black')
+best_rect = best_surf.get_rect(midright = (600,70))
+
 highscore_surf = test_font.render(f'{highscore}', False, 'Black')
 highscore_rect = highscore_surf.get_rect(midright = (775,70))
 
@@ -200,7 +203,7 @@ while True:
         if game_active:
             if event.type == obstacle_timer:
                 # Spawns enemies with a 1/4 chance for fly and 3/4 for snail
-                enemies.add(Enemy(choice(['fly', 'snail', 'snail', 'snail'])))
+                enemies.add(Enemy(choice(['parrot', 'spider', 'spider', 'spider'])))
             if event.type == fruit_timer:
                 # Spawns fruit
                 fruit.add(Fruit())
@@ -223,6 +226,7 @@ while True:
         pygame.draw.line(screen, (240, 10, 105), (25,25), (25 + (100*lives),25),15)
         screen.blit(score_surf, score_rect)
         screen.blit(highscore_surf, highscore_rect)
+        screen.blit(best_surf,best_rect)
         update_time(extra_score)
 
         # Enemies
