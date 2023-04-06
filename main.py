@@ -3,7 +3,6 @@
 ##  Pixabay - damage, death
 ##
 
-
 import pygame
 from pygame import mixer
 from sys import exit
@@ -120,25 +119,28 @@ def update_time(extra_score):
     time_rect = time_surf.get_rect(midright = (775,30))
     screen.blit(time_surf,time_rect)
 
-
 def collision_enemy():
+    # Returns true if the player is colliding with an enemey
     if pygame.sprite.spritecollide(player.sprite, enemies, True):
         return True
     else: return False
 
 def collision_fruit():
+    # Returns true if the player is colliding with a fruit
     if pygame.sprite.spritecollide(player.sprite, fruit, True):
         return True
     else: return False
 
+
 pygame.init()
+
 # OST
 mixer.init()
 mixer.music.load('audio/background.mp3')
 mixer.music.set_volume(.2)
 mixer.music.play()
 
-
+# Game details
 screen = pygame.display.set_mode((800, 400))
 pygame.display.set_caption('Runner')
 clock = pygame.time.Clock()
@@ -153,6 +155,7 @@ enemies = pygame.sprite.Group()
 fruit = pygame.sprite.GroupSingle()
 fruit.add(Fruit())
 
+# Background, scores and game over screen surfaces and rectangles
 sky_surf = pygame.image.load('graphics/Sky.png').convert()
 ground_surf = pygame.image.load('graphics/Ground.png').convert()
 
@@ -172,12 +175,7 @@ emoji_surf = pygame.image.load('graphics/cryemoji.png').convert_alpha()
 emoji_surf = pygame.transform.rotozoom(emoji_surf,0,.5)
 emoji_rect = emoji_surf.get_rect(midleft = (60,200))
 
-
-
-
-
-# Game Stats
-player_grav = 0
+# Stats
 lives = 3  # Game closes on 0
 invincible = False  # Invincibility state, triggered upon taking damage
 invTime = 0  # Each collision's time is stored and checked until 2.5 seconds have passed, disabling invincibility
@@ -185,53 +183,53 @@ start_time = 0
 score = 0
 extra_score = 0
 
-#  Timer
+# Timers
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 1500)
 
 fruit_timer = pygame.USEREVENT + 2
 pygame.time.set_timer(fruit_timer, (randint(10,20)*1000))
 
+# Running loop for the game
 while True:
     # Event loop to check for player input
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT: # Quits if the user chooses the 'X' window button
             pygame.quit()
             exit()
         if game_active:
             if event.type == obstacle_timer:
-                 enemies.add(Enemy(choice(['fly', 'snail', 'snail', 'snail'])))
+                # Spawns enemies with a 1/4 chance for fly and 3/4 for snail
+                enemies.add(Enemy(choice(['fly', 'snail', 'snail', 'snail'])))
             if event.type == fruit_timer:
+                # Spawns fruit
                 fruit.add(Fruit())
         else:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and not game_active:
-                        lives = 3
-                        start_time = pygame.time.get_ticks()
-                        highscore_surf = test_font.render(f'{highscore}', False, 'Black')
-                        highscore_rect = highscore_surf.get_rect(midright=(775, 70))
-                        game_active = True
-
-
+                    # Checks if the user wants to restart, if so lives and score are reset, with the high score being updated
+                    lives = 3
+                    start_time = pygame.time.get_ticks()
+                    highscore_surf = test_font.render(f'{highscore}', False, 'Black')
+                    highscore_rect = highscore_surf.get_rect(midright=(775, 70))
+                    game_active = True
 
     if game_active:
+
         # Background
         screen.blit(sky_surf, (0, 0))
         screen.blit(ground_surf, (0,300))
-        #pygame.draw.rect(screen, 'Pink', score_rect)
-        #pygame.draw.rect(screen, 'blue', score_rect, 5, 5)
         pygame.draw.rect(screen, (54, 42, 133), pygame.Rect(20,15,315,22))
         pygame.draw.line(screen, (240, 10, 105), (25,25), (25 + (100*lives),25),15)
         screen.blit(score_surf, score_rect)
         screen.blit(highscore_surf, highscore_rect)
         update_time(extra_score)
 
-
-        #Enemies
+        # Enemies
         enemies.draw(screen)
         enemies.update()
 
-        #Fruit
+        # Fruit
         fruit.draw(screen)
         fruit.update()
 
@@ -239,43 +237,49 @@ while True:
         player.draw(screen)
         player.update()
 
-        #Collision
+        # Collision
+        # Checks time since last hit, resetting invincibility once 2.5 secs has elapsed.
         if pygame.time.get_ticks() - invTime > 2500: invincible = False
+        # Checks to see if an enemy collided with the monkey when he is vulnerable
         if collision_enemy() and not invincible:
-           invincible = True
-           invTime = pygame.time.get_ticks()
-           lives -= 1
-           damage_sound = pygame.mixer.Sound('audio/damage.mp3')
-           damage_sound.play()
-           if lives == 0:
-               death_sound = pygame.mixer.Sound('audio/death.mp3')
-               death_sound.play()
-               game_active = False
-               enemies.empty()
-               score = int((pygame.time.get_ticks() - start_time)/10)
-               if score > highscore:
-                   highscore = int((pygame.time.get_ticks() - start_time)/10)
+            # If so, activates invibility and removes a life, ending the game if lives hits 0 and saving the score
+            invincible = True
+            invTime = pygame.time.get_ticks()
+            lives -= 1
+            damage_sound = pygame.mixer.Sound('audio/damage.mp3')
+            damage_sound.play()
+            if lives == 0:
+                death_sound = pygame.mixer.Sound('audio/death.mp3')
+                death_sound.play()
+                game_active = False
+                enemies.empty()
+                score = int((pygame.time.get_ticks() - start_time)/10)
+                if score > highscore:
+                    highscore = int((pygame.time.get_ticks() - start_time)/10)
 
-        if(collision_fruit()):
+        # Checks to see if the monkey collides with the banana
+        if collision_fruit():
+            # If the mmonkey is not at full health (3 lives), he regains 1 life, otherwise 1000 score is added.
             banana_sound = pygame.mixer.Sound('audio/banana_pickup.mp3')
             banana_sound.play()
-            if(lives < 3): lives += 1
+            if lives < 3: lives += 1
             else: extra_score += 1000
 
 
     else:
+
+        # Game Over
         screen.fill((70, 5, 117))
         screen.blit(emoji_surf, emoji_rect)
         screen.blit(gameover_surf, gameover_rect)
         screen.blit(retry_surf, retry_rect)
-
         highscore_surf = test_font.render(f'High Score     {highscore}', False, 'Black')
         highscore_rect = highscore_surf.get_rect(midright=(725, 215))
         result_surf = test_font.render(f'Your Score     {score}', False, 'Black')
         result_rect = result_surf.get_rect(midright=(725, 165))
         screen.blit(highscore_surf, highscore_rect)
         screen.blit(result_surf, result_rect)
-        player_grav = 0
 
+    # Refreshes the game to 60 FPS
     pygame.display.update()
     clock.tick(60)
