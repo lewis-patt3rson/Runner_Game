@@ -58,13 +58,13 @@ class Enemy (pygame.sprite.Sprite):
         super().__init__()
         y_pos = 0
         if type == 'parrot':
-            fly_1 = pygame.image.load('graphics/Fly/parrot_1.png').convert_alpha()
-            fly_2 = pygame.image.load('graphics/Fly/parrot_2.png').convert_alpha()
+            fly_1 = pygame.image.load('graphics/Parrot/parrot_1.png').convert_alpha()
+            fly_2 = pygame.image.load('graphics/Parrot/parrot_2.png').convert_alpha()
             self.frames = [fly_1,fly_2]
             y_pos = 200
         else:
-            spider_1 = pygame.image.load('graphics/snail/spider1.png').convert_alpha()
-            spider_2 = pygame.image.load('graphics/snail/spider2.png').convert_alpha()
+            spider_1 = pygame.image.load('graphics/Spider/spider1.png').convert_alpha()
+            spider_2 = pygame.image.load('graphics/Spider/spider2.png').convert_alpha()
             self.frames = [spider_1, spider_2]
             y_pos = 300
 
@@ -138,10 +138,10 @@ pygame.init()
 mixer.init()
 mixer.music.load('audio/background.mp3')
 mixer.music.set_volume(.2)
-mixer.music.play()
+mixer.music.play(-1)
 
 # Game details
-screen = pygame.display.set_mode((800, 400))
+screen = pygame.display.set_mode((800, 450))
 pygame.display.set_caption('Runner')
 clock = pygame.time.Clock()
 test_font = pygame.font.Font('font/ARCADECLASSIC.TTF', 50)
@@ -156,8 +156,8 @@ fruit = pygame.sprite.GroupSingle()
 fruit.add(Fruit())
 
 # Background, scores and game over screen surfaces and rectangles
-sky_surf = pygame.image.load('graphics/Sky.png').convert()
-ground_surf = pygame.image.load('graphics/Ground.png').convert()
+sky_surf = pygame.image.load('graphics/Background/background.png').convert()
+ground_surf = pygame.image.load('graphics/Background/floor.png').convert()
 
 score_surf = test_font.render('Score', False, 'Black')
 score_rect = score_surf.get_rect(midright = (600,30))
@@ -215,7 +215,10 @@ while True:
                     start_time = pygame.time.get_ticks()
                     highscore_surf = test_font.render(f'{highscore}', False, 'Black')
                     highscore_rect = highscore_surf.get_rect(midright=(775, 70))
+                    score = 0
+                    extra_score = 0
                     game_active = True
+
 
     if game_active:
 
